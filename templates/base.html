@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careerpulse</title>
+    <link rel="stylesheet"
+          href="{{url_for('static', filename='css/main.css')}}"
+
+</head>
+<body>
+    
+<h1>CareerPulse</h1>
+
+<nav>
+    {% if session.get("user_id") %}
+
+    <a href="/">Dashboard</a>
+    <a href="/applications">Applications</a>
+    <a href="/applications/new">Add Application</a>
+    <a href="/logout">Logout</a>
+
+    {% else %}
+
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+
+    {% endif %}
+</nav>
+
+<hr>
+
+{% block content %}
+{% endblock %}
+
+<script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
+
+</body>
+</html>
