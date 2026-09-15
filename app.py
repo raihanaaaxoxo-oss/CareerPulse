@@ -30,7 +30,27 @@ def login_required(f):
 @app.route("/")
 @login_required
 def home():
-    return render_template("dashboard.html")
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+            SELECT id, company, role_title, status, applied_date
+            FROM applications
+            WHERE user_id = %s
+            ORDER BY applied_date DESC
+            LIMIT 3
+            """,
+            (session["user_id"],)
+    )
+
+    applications = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template("dashboard.html", applications=applications)
+
 
 @app.route("/applications")
 @login_required

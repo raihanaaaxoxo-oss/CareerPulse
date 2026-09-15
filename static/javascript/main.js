@@ -1,88 +1,204 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const statusDropdowns = document.querySelectorAll(".status-dropdown");
+    /* =====================================================
+       Application Status Updates
+       ===================================================== */
+
+    const statusDropdowns =
+        document.querySelectorAll(".status-dropdown");
+
+
+    function updateStatusStyle(dropdown) {
+
+        dropdown.classList.remove(
+            "status-applied",
+            "status-screening",
+            "status-interviewing",
+            "status-offer",
+            "status-rejected"
+        );
+
+        const status = dropdown.value.toLowerCase();
+
+        dropdown.classList.add(
+            `status-${status}`
+        );
+    }
+
 
     statusDropdowns.forEach(dropdown => {
 
+        updateStatusStyle(dropdown);
+
+
         dropdown.addEventListener("change", async () => {
 
-            const applicationId = dropdown.dataset.id;
-            const newStatus = dropdown.value;
+            const applicationId =
+                dropdown.dataset.id;
+
+            const newStatus =
+                dropdown.value;
+
+
+            dropdown.disabled = true;
+
 
             try {
-                const response = await fetch(`/api/applications/${applicationId}/status`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        status: newStatus
-                    })
-                });
 
-                let data;
+                const response = await fetch(
+                    `/api/applications/${applicationId}/status`,
+                    {
+                        method: "PATCH",
 
-                try {
-                    data = await response.json();
-                } catch {
-                    throw new Error("Server returned an invalid response.");
-                }
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            status: newStatus
+                        })
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
 
                 if (!response.ok) {
-                    throw new Error(data.error || "Failed to update status");
+
+                    throw new Error(
+                        data.error ||
+                        "Failed to update status"
+                    );
+
                 }
 
-                console.log("Status updated:", data);
+
+                updateStatusStyle(dropdown);
+
+
+                console.log(
+                    "Status updated:",
+                    data
+                );
+
 
             } catch (error) {
-                console.error("Error updating status:", error);
-                alert("Could not update application status.");
+
+                console.error(
+                    "Error updating status:",
+                    error
+                );
+
+
+                alert(
+                    "Could not update application status."
+                );
+
+            } finally {
+
+                dropdown.disabled = false;
+
             }
 
         });
 
     });
 
-});
+
+    /* =====================================================
+       Dashboard Metrics
+       ===================================================== */
+
+    async function loadMetrics() {
+
+        const totalApplied =
+            document.getElementById("total-applied");
+
+        const interviewRate =
+            document.getElementById("interview-rate");
+
+        const totalOffers =
+            document.getElementById("total-offers");
 
 
-async function loadMetrics() {
-
-    try {
-
-        const response = await fetch("/api/metrics");
-
-        if (!response.ok) {
-            throw new Error("Failed to load dashboard metrics.");
+        if (
+            !totalApplied ||
+            !interviewRate ||
+            !totalOffers
+        ) {
+            return;
         }
 
-        const data = await response.json();
 
-        document.getElementById("total-applied").textContent = data.total_applied;
-        document.getElementById("interview-rate").textContent = data.interview_rate + "%";
-        document.getElementById("total-offers").textContent = data.offers;
+        try {
 
-    } catch (error) {
+            const response =
+                await fetch("/api/metrics");
 
-        console.error("Error loading metrics:", error);
 
-        const totalApplied = document.getElementById("total-applied");
-        const interviewRate = document.getElementById("interview-rate");
-        const totalOffers = document.getElementById("total-offers");
+            const data =
+                await response.json();
 
-        if (totalApplied) {
-            totalApplied.textContent = "Unavailable";
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Failed to load metrics"
+                );
+
+            }
+
+
+            totalApplied.textContent =
+                data.total_applied;
+
+
+            interviewRate.textContent =
+                data.interview_rate + "%";
+
+
+            totalOffers.textContent =
+                data.offers;
+
+
+            totalApplied.classList.remove(
+                "loading"
+            );
+
+            interviewRate.classList.remove(
+                "loading"
+            );
+
+            totalOffers.classList.remove(
+                "loading"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Error loading metrics:",
+                error
+            );
+
+
+            totalApplied.textContent =
+                "—";
+
+            interviewRate.textContent =
+                "—";
+
+            totalOffers.textContent =
+                "—";
+
         }
 
-        if (interviewRate) {
-            interviewRate.textContent = "Unavailable";
-        }
-
-        if (totalOffers) {
-            totalOffers.textContent = "Unavailable";
-        }
     }
-}
 
 
-document.addEventListener("DOMContentLoaded", loadMetrics);
+    loadMetrics();
+
+});

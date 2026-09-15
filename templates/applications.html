@@ -1,85 +1,84 @@
 {% extends "base.html" %}
 
+{% block title %}Applications · CareerPulse{% endblock %}
+
 {% block content %}
 
-<h2>Applications</h2>
+<div class="applications-header">
+    <div class="page-header">
+        <p class="eyebrow">Career Tracker</p>
+        <h1>Applications</h1>
+        <p>Track every opportunity and follow its progress.</p>
+    </div>
 
-<form action="/applications/search" method="GET">
+    <a href="/applications/new" class="button">+ Add Application</a>
+</div>
 
-    <input
-    type="text"
-    name="q"
-    placeholder="Search company or role..."
-    value="{{ search_query or '' }}"
-    >
-
+<form action="/applications/search" method="GET" class="search-section">
+    <input type="text" name="q" placeholder="Search company or role..." value="{{ request.args.get('q', '') }}">
+    
     <button type="submit">Search</button>
 </form>
 
-{% if search_query %}
-<p>Search results for: <strong>{{ search_query }}</strong></p>
-{% endif %}
+<div class="card table-card">
 
-<p>
-    <a href="/applications/new">
-        + Add New Application
-    </a>
-</p>
+    {% if applications %}
 
-<table border="1" cellpadding="8">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-    <tr>
-        <th>Company</th>
-        <th>Role</th>
-        <th>Applied Date</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
+            <tbody>
 
-{% if applications %}
+                {% for application in applications %}
 
-    {% for application in applications %}
+                <tr>
+                    <td><span class="company-name">{{ application.company }}</span></td>
+                    <td><span class="role-name">{{ application.role_title }}</span></td>
+                    <td>{{ application.applied_date }}</td>
+                    <td>
+                        <select class="status-dropdown" data-id="{{ application.id }}">
+                            <option value="Applied" {% if application.status == "Applied" %} selected {% endif %}>Applied</option>
+                            <option value="Screening" {% if application.status == "Screening" %} selected {% endif %}>Screening</option>
+                            <option value="Interviewing" {% if application.status == "Interviewing" %} selected {% endif %}>Interviewing</option>
+                            <option value="Offer" {% if application.status == "Offer" %} selected {% endif %}>Offer</option>
+                            <option value="Rejected" {% if application.status == "Rejected" %} selected {% endif %}>Rejected</option>
+                        </select>
+                    </td>
 
-    <tr>
-        <td>{{ application.company }}</td>
-        <td>{{ application.role_title }}</td>
-        <td>{{ application.applied_date }}</td>
-        <td>
-            <select class="status-dropdown" data-id="{{ application.id }}">
-                <option value="Applied" {% if application.status == "Applied" %}selected{% endif %}>Applied</option>
-                <option value="Screening" {% if application.status == "Screening" %}selected{% endif %}>Screening</option>
-                <option value="Interviewing" {% if application.status == "Interviewing" %}selected{% endif %}>Interviewing</option>
-                <option value="Offer" {% if application.status == "Offer" %}selected{% endif %}>Offer</option>
-                <option value="Rejected" {% if application.status == "Rejected" %}selected{% endif %}>Rejected</option>
-            </select>
-        </td>
-        <td>
-            <form
-                action="/applications/{{ application['id'] }}/delete"
-                method="POST"
-                onsubmit="return confirm('Are you sure you want to delet this application?');"
-            >
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
+                    <td>
+                        <form action="/applications/{{ application.id }}/delete" method="POST" class="delete-form" onsubmit="return confirm('Delete this application?')">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </td>
+                </tr>
 
-    {% endfor %}
+                {% endfor %}
 
-{% else %}
+            </tbody>
+        </table>
+    </div>
 
-<tr> 
-    <td colspan="4">
-        No applications found.
-    </td>
-</tr>
+    {% else %}
 
-{% endif%}
+    <div class="empty-state">
+        <div class="empty-icon">◌</div>
+        <h3>No applications found</h3>
+        <p>You haven't added any applications yet, or your search returned no results.</p>
 
-</table>
+        <a href="/applications/new" class="button">+ Add Application</a>
+    </div>
 
-<br>
+    {% endif %}
 
-<a href="/">Dashboard</a>
+</div>
 
 {% endblock %}

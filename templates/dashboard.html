@@ -1,26 +1,99 @@
 {% extends "base.html" %}
 
+{% block title %}Dashboard · CareerPulse{% endblock %}
+
 {% block content %}
 
-<h2>Dashboard</h2>
-
-<p>Welcome to CareerPulse.</p>
-
-<a href="/applications">View Applications</a>
-
-<div>
-    <h3>Total Applications</h3>
-    <p id="total-applied">Loading...</p>
+<div class="page-header">
+    <p class="eyebrow">Career command centre</p>
 </div>
 
-<div>
-    <h3>Interview Rate</h3>
-    <p id="interview-rate">Loading...</p>
-</div>
+<section class="card dashboard-hero">
+    <h1>Welcome to CareerPulse.</h1>
+    <p>Keep track of your applications, monitor your progress, and stay focused on where your career is headed.</p>
 
-<div>
-    <h3>Offers</h3>
-    <p id="total-offers">Loading...</p>
-</div>
+    <div class="hero-actions">
+        <a href="/applications/new" class="button">+ Add Application</a>
+        <a href="/applications" class="button button-secondary">View Applications</a>
+    </div>
+</section>
+
+<section class="metrics-grid">
+    <div class="card metric-card">
+    <div class="metric-icon">✦</div>
+    <p class="metric-label">Total Applications</p>
+    <p id="total-applied" class="metric-value loading">Loading...</p>
+    </div>
+
+    <div class="card metric-card">
+        <div class="metric-icon">◌</div>
+        <p class="metric-label">Interview Rate</p>
+        <p id="interview-rate" class="metric-value loading">Loading...</p>
+    </div>
+
+    <div class="card metric-card">
+        <div class="metric-icon">★</div>
+        <p class="metric-label">Offers</p>
+        <p id="total-offers" class="metric-value loading">Loading...</p>
+    </div>
+</section>
+
+<section class="card dashboard-applications">
+    <div class="card-header">
+        <div>
+            <h2>Your Applications</h2>
+            <p>Manage and monitor your current opportunities.</p>
+        </div>
+        <a href="/applications" class="button button-secondary">View All</a>
+    </div>
+
+    {% if applications %}
+
+    <div class="dashboard-application-list">
+
+        {% for application in applications %}
+
+        <div class="dashboard-application-row">
+            <div class="dashboard-application-main">
+                <p class="dashboard-application-company">{{ application.company }}</p>
+                <p class="dashboard-application-role">{{ application.role_title }}</p>
+            </div>
+
+            <div class="dashboard-application-details">
+                <span class="dashboard-status
+                        {% if application.status == 'Applied' %}
+                            status-applied
+                        {% elif application.status == 'Screening' %}
+                            status-screening
+                        {% elif application.status == 'Interviewing' %}
+                            status-interviewing
+                        {% elif application.status == 'Offer' %}
+                            status-offer
+                        {% elif application.status == 'Rejected' %}
+                            status-rejected
+                        {% endif %}
+                ">
+                    {{ application.status }}
+                </span>
+
+                <span class="dashboard-application-date">{{ application.applied_date }}</span>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <h3>Your career journey starts here</h3>
+        <p>Add an application to begin building your personal career trajectory.</p>
+
+        <a href="/applications/new" class="button">Add your first application</a>
+    </div>
+
+    {% endif %}
+
+</section>
 
 {% endblock %}
